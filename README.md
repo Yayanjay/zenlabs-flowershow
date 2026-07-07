@@ -9,7 +9,7 @@ sequenceDiagram
     participant S as System API
 
     rect rgb(240, 230, 220)
-        Note over V,A: ðŸ”¶ PRE-PAYMENT FLOW (Manual / Offline)
+        Note over V,A: PRE-PAYMENT FLOW (Manual / Offline)
         V->>S: GET /api/v1/plans
         S-->>V: [Free, Basic, Pro, Unlimited]
         V->>A: Contact via WhatsApp
@@ -18,7 +18,7 @@ sequenceDiagram
     end
 
     rect rgb(220, 235, 245)
-        Note over O,S: ðŸ”· POST-PAYMENT FLOW (System)
+        Note over O,S: POST-PAYMENT FLOW (System)
 
         A->>S: POST /api/v1/admin/owners {email, plan_id}
         S->>S: Generate 12-char temp password<br/>Create user (role=owner, plan_id set)
