@@ -9,7 +9,7 @@ sequenceDiagram
     participant S as System API
 
     rect rgb(240, 230, 220)
-        Note over V,A: PRE-PAYMENT FLOW (Manual / Offline)
+        Note over V,A: 🔶 PRE-PAYMENT FLOW (Manual / Offline)
         V->>S: GET /api/v1/plans
         S-->>V: [Free, Basic, Pro, Unlimited]
         V->>A: Contact via WhatsApp
@@ -18,7 +18,7 @@ sequenceDiagram
     end
 
     rect rgb(220, 235, 245)
-        Note over O,S: POST-PAYMENT FLOW (System)
+        Note over O,S: 🔷 POST-PAYMENT FLOW (System)
 
         A->>S: POST /api/v1/admin/owners {email, plan_id}
         S->>S: Generate 12-char temp password<br/>Create user (role=owner, plan_id set)
@@ -26,40 +26,40 @@ sequenceDiagram
         A->>O: Share temp password via WhatsApp
 
         O->>S: POST /api/v1/auth/login {email, temp_password}
-        S-->>O: {access_token, refresh_token} (JWT: org_id=null)
+        S-->>O: {access_token} (JWT: org_id=null)
 
         O->>S: POST /api/v1/auth/change-password {old, new}
         S-->>O: 200 OK
 
         O->>S: POST /api/v1/onboarding {name, address, phone}
-        S->>S: Create organization<br/>Copy plan_id from user -> org<br/>Update user.organization_id
-        S-->>O: {id, name, plan_id, ...}
+        S->>S: Create organization<br/>Copy plan_id from user → org<br/>Update user.organization_id
+        S-->>O: {id, name, plan_id}
 
         O->>S: POST /api/v1/auth/login (re-login)
         S-->>O: {access_token} (JWT: org_id=populated)
 
-        Note over O,S: --- SETUP PROPERTIES & RENTERS ---
+        Note over O,S: --- SETUP PROPERTY & UNITS ---
 
         O->>S: POST /api/v1/properties {name, address, ...}
-        S-->>O: {id, name, property_type, ...}
+        S->>S: Verify org has plan<br/>(no unit limit check for properties)
+        S-->>O: {id, name, property_type}
+
+        O->>S: POST /api/v1/properties/:id/units {name, monthly_price}
+        S->>S: Count org's existing units<br/>Compare with plan.max_units<br/>Reject if >= limit
+        S-->>O: {id, name, status: "available"}
+
+        Note over O,S: --- REPEAT FOR EACH KAMAR ---
+
+        Note over O,S: --- WHEN RENTER ARRIVES ---
 
         O->>S: POST /api/v1/renters {name, phone}
         S-->>O: {id, name, phone}
 
-        O->>S: GET /api/v1/renters (dropdown)
-        S-->>O: [{id, name, phone}, ...]
-
-        Note over O,S: --- CREATE UNITS WITH PLAN ENFORCEMENT ---
-
-        O->>S: POST /api/v1/properties/:id/units {name, monthly_price}
-        S->>S: Count org's existing units<br/>Compare with plan.max_units<br/>(reject if >= limit)
-        S-->>O: {id, name, status: "available"}
-
-        Note over O,S: --- ASSIGN / UNASSIGN RENTER ---
-
-        O->>S: POST .../units/:unitId/assign {renter_id}
-        S->>S: Verify unit available,<br/>renter exists, set renter_id
+        O->>S: POST .../units/:unitId/assign {renter_id, lease_start}
+        S->>S: Verify unit available,<br/>renter exists
         S-->>O: {status: "occupied", renter: {id, name, phone}}
+
+        Note over O,S: --- WHEN RENTER MOVES OUT ---
 
         O->>S: POST .../units/:unitId/unassign
         S->>S: Clear renter_id, lease_start
