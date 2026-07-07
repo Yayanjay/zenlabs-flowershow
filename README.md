@@ -1,4 +1,4 @@
-
+  
 ### Owner Register Flow
 
 ```mermaid
@@ -66,4 +66,3 @@ sequenceDiagram
         S-->>O: {status: "available"}
     end
 ```
-
