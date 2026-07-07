@@ -32,7 +32,7 @@ sequenceDiagram
         S-->>O: 200 OK
 
         O->>S: POST /api/v1/onboarding {name, address, phone}
-        S->>S: Create organization<br/>Copy plan_id from user â†’ org<br/>Update user.organization_id
+        S->>S: Create organization<br/>Copy plan_id from user -> org<br/>Update user.organization_id
         S-->>O: {id, name, plan_id, ...}
 
         O->>S: POST /api/v1/auth/login (re-login)
